@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">Valkyrindle</title>
+
+<!--
+  Using different fonts? Swap this Google Fonts link for your own,
+  then update CONFIG.fonts below to match the family names.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ================================================================
+     STRUCTURAL CSS ONLY — you shouldn't need to touch this file's
+     <style> block at all. Every color, font, spacing, and background
+     value below is a CSS variable (var(--something)), and ALL of
+     those variables are set from the CONFIG object in <script> at
+     the bottom of this file. Go edit CONFIG, not this CSS.
+     ================================================================ */
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: var(--bg-style);
+    color:var(--text);
+    font-family: var(--font-body);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:32px 16px 80px;
+  }
+  h1{
+    font-family: var(--font-display);
+    font-weight:700;
+    letter-spacing:0.08em;
+    font-size:2.1rem;
+    text-transform:uppercase;
+    margin:0 0 4px;
+    background:linear-gradient(90deg,var(--accent-1),var(--accent-2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    text-align:center;
+  }
+  .subtitle{
+    color:var(--text-dim);
+    font-size:0.92rem;
+    margin-bottom:28px;
+    text-align:center;
+    max-width:560px;
+    line-height:1.5;
+  }
+  .scan-line{
+    width:100%;
+    max-width:var(--max-width);
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--accent-1), transparent);
+    margin-bottom:24px;
+    opacity:0.6;
+  }
+  #guess-form{
+    display:flex;
+    gap:8px;
+    width:100%;
+    max-width:420px;
+    position:relative;
+  }
+  #guess-input{
+    flex:1;
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:12px 14px;
+    border-radius:var(--radius);
+    font-size:1rem;
+    font-family: var(--font-body);
+    outline:none;
+  }
+  #guess-input:focus{border-color:var(--accent-1);box-shadow:0 0 0 3px color-mix(in srgb, var(--accent-1) 20%, transparent);}
+  #guess-form button{
+    background:var(--accent-1);
+    color:var(--bg);
+    border:none;
+    border-radius:var(--radius);
+    padding:0 20px;
+    font-family: var(--font-display);
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    cursor:pointer;
+    font-size:0.95rem;
+  }
+  #guess-form button:hover{ filter:brightness(1.15); }
+  #autocomplete{
+    position:absolute;
+    top:calc(100% + 6px);
+    left:0;
+    right:76px;
+    background:var(--panel-alt);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    max-height:220px;
+    overflow-y:auto;
+    z-index:10;
+    display:none;
+  }
+  #autocomplete div{
+    padding:10px 14px;
+    cursor:pointer;
+    font-size:0.92rem;
+    border-bottom:1px solid var(--line);
+  }
+  #autocomplete div:last-child{border-bottom:none;}
+  #autocomplete div:hover{background:var(--panel);color:var(--accent-1);}
+
+  #board-wrap{
+    width:100%;
+    max-width:var(--max-width);
+    margin-top:28px;
+    overflow-x:auto; /* if you add lots of categories, the board scrolls instead of breaking */
+  }
+  #board{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    min-width:520px; /* prevents cramped columns on narrow screens; board scrolls instead */
+  }
+  .header-row, .guess-row{
+    display:grid;
+    gap:8px;
+  }
+  .header-row div{
+    font-family: var(--font-display);
+    font-size:0.75rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    text-align:center;
+    padding-bottom:4px;
+  }
+  .cell{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 6px;
+    text-align:center;
+    font-size:0.88rem;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height: var(--card-min-height);
+    animation: flip 0.5s ease;
+  }
+  @keyframes flip{
+    0%{transform:rotateX(90deg);opacity:0;}
+    100%{transform:rotateX(0deg);opacity:1;}
+  }
+  .cell.name{font-family: var(--font-display);font-weight:700;font-size:1rem;}
+  .match{background:color-mix(in srgb, var(--accent-2) 18%, transparent);border-color:var(--accent-2);color:var(--accent-2);}
+  .close{background:color-mix(in srgb, var(--accent-1) 14%, transparent);border-color:var(--accent-1);color:var(--accent-1);}
+  .no-match{background:color-mix(in srgb, var(--danger) 8%, transparent);border-color:var(--line);color:var(--text-dim);}
+
+  #win-banner{
+    margin-top:24px;
+    padding:16px 20px;
+    background:linear-gradient(90deg, color-mix(in srgb, var(--accent-2) 15%, transparent), color-mix(in srgb, var(--accent-1) 10%, transparent));
+    border:1px solid var(--accent-2);
+    border-radius:8px;
+    text-align:center;
+    display:none;
+    max-width:520px;
+    font-family: var(--font-display);
+    font-size:1.1rem;
+    letter-spacing:0.03em;
+  }
+  #guess-count{
+    color:var(--text-dim);
+    font-size:0.8rem;
+    margin-top:10px;
+  }
+  footer{
+    margin-top:48px;
+    color:var(--text-dim);
+    font-size:0.75rem;
+    text-align:center;
+    max-width:480px;
+    line-height:1.6;
+  }
+</style>
+</head>
+<body>
+
+  <h1 id="game-title">Valkyrindle</h1>
+  <p class="subtitle" id="game-subtitle"></p>
+  <div class="scan-line"></div>
+
+  <form id="guess-form" autocomplete="off">
+    <input id="guess-input" type="text" placeholder="Type a battlesuit name…" />
+    <div id="autocomplete"></div>
+    <button type="submit">Guess</button>
+  </form>
+  <div id="guess-count"></div>
+
+  <div id="board-wrap">
+    <div id="board">
+      <div class="header-row" id="header-row"></div>
+    </div>
+  </div>
+
+  <div id="win-banner"></div>
+
+  <footer id="footer-note">
+    Fan-made prototype — data is hand-entered and may not perfectly match
+    the current in-game roster. Edit the CONFIG object in the source to
+    fix, expand, or completely reshape it.
+  </footer>
+
+<script>
+/* ================================================================
+   ================  E V E R Y T H I N G   Y O U   ================
+   ================  C U S T O M I Z E   I S   H E R E  ============
+   ================================================================
+   This one CONFIG object controls the whole game: colors, fonts,
+   layout, the guess categories/columns, and the roster of
+   battlesuits. Change values here and reload the page — you never
+   need to touch the CSS or the game-logic code below.
+================================================================= */
+const CONFIG = {
+
+  // ---------------- 1. TEXT ----------------
+  meta: {
+    title: "Valkyrindle",
+    subtitle: "Guess today's Honkai Impact 3rd battlesuit. Every guess reveals how close you are.",
+    inputPlaceholder: "Type a battlesuit name…",
+    footerNote: "Fan-made prototype — data is hand-entered and may not perfectly match the current in-game roster. Edit CONFIG.roster below to fix or expand it.",
+  },
+
+  // ---------------- 2. COLORS ----------------
+  // Any valid CSS color works: "#4FD8EB", "rgb(79,216,235)", "cyan", etc.
+  theme: {
+    bg:        "#0A0D14",  // page background base color
+    panel:     "#111623",  // guess cards / input background
+    panelAlt:  "#161D2E",  // autocomplete dropdown background
+    line:      "#262f45",  // borders
+    accent1:   "#4FD8EB",  // "close" hint color + primary accent (buttons, focus ring)
+    accent2:   "#E8B54D",  // "exact match" color + secondary accent
+    danger:    "#E1495A",  // used for invalid-guess flash
+    text:      "#E7EDF7",  // main text
+    textDim:   "#8993AC",  // secondary/dim text
+  },
+
+  // Background behind the whole page. Use any CSS `background` value:
+  // - solid color: "background: #0A0D14;"
+  // - your own image: "background: url('https://example.com/bg.jpg') center/cover;"
+  // - the default radial glow (matches theme colors automatically):
+  backgroundStyle: "radial-gradient(1200px 600px at 50% -10%, #16233a 0%, #0A0D14 60%), #0A0D14",
+
+  // ---------------- 3. FONTS ----------------
+  fonts: {
+    display: "'Rajdhani', sans-serif", // headings, buttons, column labels
+    body:    "'Inter', sans-serif",     // everything else
+    // Remember: if you change these, also update the Google Fonts
+    // <link> tag in <head> to actually load the new font files.
+  },
+
+  // ---------------- 4. LAYOUT ----------------
+  layout: {
+    maxWidth: "720px",   // overall board width
+    radius:   "6px",     // corner rounding on cards/buttons/inputs
+    cardMinHeight: "52px",
+  },
+
+  // ---------------- 5. CATEGORIES (the guess columns) ----------------
+  // Add, remove, reorder, or rename columns freely. Each category needs:
+  //   key      - must match a field name used in every roster entry below
+  //   label    - column header text shown to players
+  //   compare  - "exact"  -> just checks if values are identical
+  //              "ordered"-> also shows a ↑/↓ hint using the `order` list
+  //                          (use this for anything with a real ranking,
+  //                          like rarity)
+  //   order    - only needed when compare is "ordered": list values from
+  //              lowest to highest
+  categories: [
+    { key: "owner",   label: "Character", compare: "exact" },
+    { key: "type",    label: "Type",      compare: "exact" },
+    { key: "weapon",  label: "Weapon",    compare: "exact" },
+    { key: "faction", label: "Faction",   compare: "exact" },
+    { key: "rarity",  label: "Rarity",    compare: "ordered", order: ["A", "S", "SS", "SSS"] },
+  ],
+
+  // ---------------- 6. ROSTER (battlesuits) ----------------
+  // `name` is what players type/guess (the battlesuit itself, e.g. a
+  // specific outfit — not just the character). Every other field must
+  // match a `key` from CONFIG.categories above. Add as many as you like.
+  roster: [
+    { name: "Knight Moonbeam",              owner: "Kiana Kaslana",      type: "Physical",  weapon: "Twin Blades", faction: "Schicksal",     rarity: "S" },
+    { name: "Herrscher of the Void",        owner: "Kiana Kaslana",      type: "Imaginary", weapon: "Twin Blades", faction: "Schicksal",     rarity: "SSS" },
+    { name: "Valkyrie Chariot",             owner: "Kiana Kaslana",      type: "Physical",  weapon: "Twin Blades", faction: "Schicksal",     rarity: "A" },
+    { name: "Herrscher of Origin",          owner: "Kiana Kaslana",      type: "Imaginary", weapon: "Twin Blades", faction: "Schicksal",     rarity: "SSS" },
+    { name: "Bright Knight: Excelsis",      owner: "Raiden Mei",         type: "Physical",  weapon: "Sword",       faction: "Schicksal",     rarity: "SSS" },
+    { name: "Herrscher of Thunder",         owner: "Raiden Mei",         type: "Thunder",   weapon: "Gauntlets",   faction: "Schicksal",     rarity: "SSS" },
+    { name: "Valkyrie Triumph",             owner: "Raiden Mei",         type: "Fire",      weapon: "Sword",       faction: "Schicksal",     rarity: "A" },
+    { name: "Herrscher of Reason",          owner: "Bronya Zaychik",     type: "Quantum",   weapon: "Umbrella",    faction: "Anti-Entropy",  rarity: "SSS" },
+    { name: "Silverwing: Prometheus",       owner: "Bronya Zaychik",     type: "Physical",  weapon: "Greatsword",  faction: "Anti-Entropy",  rarity: "S" },
+    { name: "Bunny Bronya",                 owner: "Bronya Zaychik",     type: "Ice",       weapon: "Gauntlets",   faction: "Anti-Entropy",  rarity: "A" },
+    { name: "Herrscher of Sentience",       owner: "Fu Hua",             type: "Imaginary", weapon: "Twin Blades", faction: "Schicksal",     rarity: "SSS" },
+    { name: "Sakura Yushou",                owner: "Fu Hua",             type: "Fire",      weapon: "Katana",      faction: "Schicksal",     rarity: "S" },
+    { name: "Beatrice",                     owner: "Fu Hua",             type: "Ice",       weapon: "Twin Blades", faction: "Schicksal",     rarity: "S" },
+    { name: "Valkyrie Ranger",              owner: "Rita Rossweisse",    type: "Physical",  weapon: "Twin Pistols",faction: "World Serpent", rarity: "SSS" },
+    { name: "Miss Pole Dance",              owner: "Rita Rossweisse",    type: "Fire",      weapon: "Whip",        faction: "World Serpent", rarity: "A" },
+    { name: "Dimension Slayer: Argent Knight", owner: "Seele Vollerei",  type: "Physical",  weapon: "Scythe",      faction: "Anti-Entropy",  rarity: "S" },
+  ],
+};
+
+/* ================================================================
+   ============  GAME ENGINE — you don't need to edit  =============
+   ============  anything below this line to customize  ============
+   ================================================================ */
+
+// --- Apply CONFIG.theme / fonts / layout as CSS variables -------
+const root = document.documentElement.style;
+root.setProperty('--bg', CONFIG.theme.bg);
+root.setProperty('--panel', CONFIG.theme.panel);
+root.setProperty('--panel-alt', CONFIG.theme.panelAlt);
+root.setProperty('--line', CONFIG.theme.line);
+root.setProperty('--accent-1', CONFIG.theme.accent1);
+root.setProperty('--accent-2', CONFIG.theme.accent2);
+root.setProperty('--danger', CONFIG.theme.danger);
+root.setProperty('--text', CONFIG.theme.text);
+root.setProperty('--text-dim', CONFIG.theme.textDim);
+root.setProperty('--bg-style', CONFIG.backgroundStyle);
+root.setProperty('--font-display', CONFIG.fonts.display);
+root.setProperty('--font-body', CONFIG.fonts.body);
+root.setProperty('--max-width', CONFIG.layout.maxWidth);
+root.setProperty('--radius', CONFIG.layout.radius);
+root.setProperty('--card-min-height', CONFIG.layout.cardMinHeight);
+
+// --- Apply CONFIG.meta text --------------------------------------
+document.getElementById('page-title').textContent = CONFIG.meta.title;
+document.getElementById('game-title').textContent = CONFIG.meta.title;
+document.getElementById('game-subtitle').textContent = CONFIG.meta.subtitle;
+document.getElementById('guess-input').placeholder = CONFIG.meta.inputPlaceholder;
+document.getElementById('footer-note').textContent = CONFIG.meta.footerNote;
+
+// --- Build the header row from CONFIG.categories ------------------
+const headerRow = document.getElementById('header-row');
+const nameHeader = document.createElement('div');
+nameHeader.textContent = "Battlesuit";
+headerRow.appendChild(nameHeader);
+CONFIG.categories.forEach(cat => {
+  const div = document.createElement('div');
+  div.textContent = cat.label;
+  headerRow.appendChild(div);
+});
+
+// Grid columns: name column is wider, every category column is equal.
+const gridTemplate = `1.3fr repeat(${CONFIG.categories.length}, 1fr)`;
+headerRow.style.gridTemplateColumns = gridTemplate;
+
+// --- Pick today's answer (deterministic by date) -------------------
+function pickAnswer(){
+  const today = new Date();
+  const seed = today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate();
+  return CONFIG.roster[seed % CONFIG.roster.length];
+}
+const ANSWER = pickAnswer();
+let guessesMade = 0;
+let solved = false;
+const guessedNames = new Set();
+
+// --- Autocomplete ---------------------------------------------------
+const input = document.getElementById('guess-input');
+const autocomplete = document.getElementById('autocomplete');
+
+input.addEventListener('input', () => {
+  const q = input.value.trim().toLowerCase();
+  autocomplete.innerHTML = '';
+  if (!q) { autocomplete.style.display = 'none'; return; }
+  const matches = CONFIG.roster.filter(c =>
+    c.name.toLowerCase().includes(q) && !guessedNames.has(c.name)
+  ).slice(0, 6);
+  if (matches.length === 0) { autocomplete.style.display = 'none'; return; }
+  matches.forEach(c => {
+    const div = document.createElement('div');
+    div.textContent = c.name;
+    div.onclick = () => { input.value = c.name; autocomplete.style.display = 'none'; input.focus(); };
+    autocomplete.appendChild(div);
+  });
+  autocomplete.style.display = 'block';
+});
+
+document.addEventListener('click', (e) => {
+  if (!autocomplete.contains(e.target) && e.target !== input) {
+    autocomplete.style.display = 'none';
+  }
+});
+
+// --- Handling a guess -------------------------------------------------
+document.getElementById('guess-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (solved) return;
+
+  const name = input.value.trim();
+  const guess = CONFIG.roster.find(c => c.name.toLowerCase() === name.toLowerCase());
+
+  if (!guess) {
+    input.style.borderColor = 'var(--danger)';
+    setTimeout(() => input.style.borderColor = 'var(--line)', 600);
+    return;
+  }
+  if (guessedNames.has(guess.name)) return;
+
+  guessedNames.add(guess.name);
+  guessesMade++;
+  renderRow(guess);
+  input.value = '';
+  autocomplete.style.display = 'none';
+
+  if (guess.name === ANSWER.name) {
+    solved = true;
+    const banner = document.getElementById('win-banner');
+    banner.style.display = 'block';
+    banner.textContent = `Correct — it was ${ANSWER.name}! Solved in ${guessesMade} guess${guessesMade > 1 ? 'es' : ''}.`;
+  }
+  document.getElementById('guess-count').textContent =
+    solved ? '' : `Guesses: ${guessesMade}`;
+});
+
+// --- Rendering a guess row, built dynamically from CONFIG.categories --
+function renderRow(guess){
+  const row = document.createElement('div');
+  row.className = 'guess-row';
+  row.style.gridTemplateColumns = gridTemplate;
+
+  row.appendChild(makeCell(guess.name, guess.name === ANSWER.name ? 'match' : 'no-match', true));
+
+  CONFIG.categories.forEach(cat => {
+    const guessVal = guess[cat.key];
+    const answerVal = ANSWER[cat.key];
+    let cls = 'no-match';
+    let text = guessVal;
+
+    if (guessVal === answerVal) {
+      cls = 'match';
+    } else if (cat.compare === 'ordered' && Array.isArray(cat.order)) {
+      const gIdx = cat.order.indexOf(guessVal);
+      const aIdx = cat.order.indexOf(answerVal);
+      if (gIdx !== -1 && aIdx !== -1) {
+        cls = 'close';
+        text += gIdx < aIdx ? ' ↑' : ' ↓';
+      }
+    }
+    row.appendChild(makeCell(text, cls));
+  });
+
+  document.getElementById('board').appendChild(row);
+}
+
+function makeCell(text, cls, isName=false){
+  const div = document.createElement('div');
+  div.className = 'cell ' + cls + (isName ? ' name' : '');
+  div.textContent = text;
+  return div;
+}
+</script>
+</body>
+</html>
