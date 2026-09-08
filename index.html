@@ -32,6 +32,22 @@
     align-items:center;
     padding:32px 16px 80px;
   }
+
+  /* Semi-transparent "glass" panel that sits between the background
+     image and all the game content, so text stays readable. */
+  #page-panel{
+    background: var(--overlay-color);
+    backdrop-filter: blur(var(--overlay-blur));
+    -webkit-backdrop-filter: blur(var(--overlay-blur));
+    border-radius: var(--overlay-radius);
+    padding: var(--overlay-padding);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+    max-width: calc(var(--max-width) + 80px);
+  }
+
   h1{
     font-family: var(--font-display);
     font-weight:700;
@@ -48,11 +64,34 @@
   .subtitle{
     color:var(--text-dim);
     font-size:0.92rem;
-    margin-bottom:28px;
+    margin-bottom:20px;
     text-align:center;
     max-width:560px;
     line-height:1.5;
   }
+
+  /* ---- Tabs (Daily / Endless) ---- */
+  #mode-tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:20px;
+  }
+  .tab-btn{
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--text-dim);
+    padding:10px 22px;
+    border-radius:var(--radius);
+    font-family: var(--font-display);
+    font-weight:700;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    font-size:0.85rem;
+    cursor:pointer;
+  }
+  .tab-btn:hover:not(.active){ border-color:var(--accent-1); color:var(--accent-1); }
+  .tab-btn.active{ background:var(--accent-1); color:var(--bg); border-color:var(--accent-1); }
+
   .scan-line{
     width:100%;
     max-width:var(--max-width);
@@ -61,14 +100,22 @@
     margin-bottom:24px;
     opacity:0.6;
   }
-  #guess-form{
+
+  .mode-section{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+  }
+
+  .guess-form{
     display:flex;
     gap:8px;
     width:100%;
     max-width:420px;
     position:relative;
   }
-  #guess-input{
+  .guess-input{
     flex:1;
     background:var(--panel);
     border:1px solid var(--line);
@@ -79,8 +126,8 @@
     font-family: var(--font-body);
     outline:none;
   }
-  #guess-input:focus{border-color:var(--accent-1);box-shadow:0 0 0 3px color-mix(in srgb, var(--accent-1) 20%, transparent);}
-  #guess-form button{
+  .guess-input:focus{border-color:var(--accent-1);box-shadow:0 0 0 3px color-mix(in srgb, var(--accent-1) 20%, transparent);}
+  .guess-form button{
     background:var(--accent-1);
     color:var(--bg);
     border:none;
@@ -93,8 +140,8 @@
     cursor:pointer;
     font-size:0.95rem;
   }
-  #guess-form button:hover{ filter:brightness(1.15); }
-  #autocomplete{
+  .guess-form button:hover{ filter:brightness(1.15); }
+  .autocomplete{
     position:absolute;
     top:calc(100% + 6px);
     left:0;
@@ -102,36 +149,52 @@
     background:var(--panel-alt);
     border:1px solid var(--line);
     border-radius:var(--radius);
-    max-height:220px;
+    max-height:260px;
     overflow-y:auto;
     z-index:10;
     display:none;
   }
-  #autocomplete div{
-    padding:10px 14px;
+  .autocomplete-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 14px;
     cursor:pointer;
     font-size:0.92rem;
     border-bottom:1px solid var(--line);
   }
-  #autocomplete div:last-child{border-bottom:none;}
-  #autocomplete div:hover{background:var(--panel);color:var(--accent-1);}
+  .autocomplete-item:last-child{border-bottom:none;}
+  .autocomplete-item:hover{background:var(--panel);color:var(--accent-1);}
 
-  #board-wrap{
+  .portrait{
+    border-radius: var(--portrait-radius);
+    background: var(--panel-alt);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: var(--font-display);
+    font-weight:700;
+    color:var(--text-dim);
+    overflow:hidden;
+    flex-shrink:0;
+  }
+  .portrait img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .portrait-dropdown{ width: var(--portrait-size-dropdown); height: var(--portrait-size-dropdown); font-size:0.65rem; }
+  .portrait-board{ width: var(--portrait-size-board); height: var(--portrait-size-board); font-size:0.8rem; }
+
+  .board-wrap{
     width:100%;
     max-width:var(--max-width);
     margin-top:28px;
-    overflow-x:auto; /* if you add lots of categories, the board scrolls instead of breaking */
+    overflow-x:auto;
   }
-  #board{
+  .board{
     display:flex;
     flex-direction:column;
     gap:8px;
-    min-width:520px; /* prevents cramped columns on narrow screens; board scrolls instead */
+    min-width:520px;
   }
-  .header-row, .guess-row{
-    display:grid;
-    gap:8px;
-  }
+  .header-row, .guess-row{ display:grid; gap:8px; }
   .header-row div{
     font-family: var(--font-display);
     font-size:0.75rem;
@@ -159,12 +222,19 @@
     0%{transform:rotateX(90deg);opacity:0;}
     100%{transform:rotateX(0deg);opacity:1;}
   }
-  .cell.name{font-family: var(--font-display);font-weight:700;font-size:1rem;}
+  .cell.name{
+    font-family: var(--font-display);
+    font-weight:700;
+    font-size:0.85rem;
+    flex-direction:column;
+    gap:6px;
+    padding:10px 6px;
+  }
   .match{background:color-mix(in srgb, var(--accent-2) 18%, transparent);border-color:var(--accent-2);color:var(--accent-2);}
   .close{background:color-mix(in srgb, var(--accent-1) 14%, transparent);border-color:var(--accent-1);color:var(--accent-1);}
   .no-match{background:color-mix(in srgb, var(--danger) 8%, transparent);border-color:var(--line);color:var(--text-dim);}
 
-  #win-banner{
+  .win-banner{
     margin-top:24px;
     padding:16px 20px;
     background:linear-gradient(90deg, color-mix(in srgb, var(--accent-2) 15%, transparent), color-mix(in srgb, var(--accent-1) 10%, transparent));
@@ -177,11 +247,37 @@
     font-size:1.1rem;
     letter-spacing:0.03em;
   }
-  #guess-count{
-    color:var(--text-dim);
-    font-size:0.8rem;
-    margin-top:10px;
+  .guess-count{ color:var(--text-dim); font-size:0.8rem; margin-top:10px; }
+
+  /* Daily-only countdown */
+  .countdown{
+    margin-top:16px;
+    font-family: var(--font-display);
+    font-size:0.95rem;
+    letter-spacing:0.05em;
+    color:var(--accent-2);
+    text-align:center;
   }
+
+  /* Endless-only controls */
+  .play-again-btn{
+    margin-top:20px;
+    background:var(--accent-2);
+    color:var(--bg);
+    border:none;
+    border-radius:var(--radius);
+    padding:12px 26px;
+    font-family: var(--font-display);
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    cursor:pointer;
+    font-size:0.9rem;
+    display:none;
+  }
+  .play-again-btn:hover{ filter:brightness(1.1); }
+  .streak{ margin-top:10px; color:var(--text-dim); font-size:0.85rem; }
+
   footer{
     margin-top:48px;
     color:var(--text-dim);
@@ -194,30 +290,24 @@
 </head>
 <body>
 
-  <h1 id="game-title">Valkyrindle</h1>
-  <p class="subtitle" id="game-subtitle"></p>
-  <div class="scan-line"></div>
+  <div id="page-panel">
+    <h1 id="game-title">Valkyrindle</h1>
+    <p class="subtitle" id="game-subtitle"></p>
 
-  <form id="guess-form" autocomplete="off">
-    <input id="guess-input" type="text" placeholder="Type a battlesuit name…" />
-    <div id="autocomplete"></div>
-    <button type="submit">Guess</button>
-  </form>
-  <div id="guess-count"></div>
-
-  <div id="board-wrap">
-    <div id="board">
-      <div class="header-row" id="header-row"></div>
+    <div id="mode-tabs">
+      <button class="tab-btn active" data-mode="daily" id="tab-daily"></button>
+      <button class="tab-btn" data-mode="endless" id="tab-endless"></button>
     </div>
+
+    <div class="scan-line"></div>
+
+    <div id="daily-section" class="mode-section"></div>
+    <div id="endless-section" class="mode-section" style="display:none;"></div>
+
+    <footer id="footer-note">
+      Fan-made prototype 
+    </footer>
   </div>
-
-  <div id="win-banner"></div>
-
-  <footer id="footer-note">
-    Fan-made prototype — data is hand-entered and may not perfectly match
-    the current in-game roster. Edit the CONFIG object in the source to
-    fix, expand, or completely reshape it.
-  </footer>
 
 <script>
 /* ================================================================
@@ -225,9 +315,9 @@
    ================  C U S T O M I Z E   I S   H E R E  ============
    ================================================================
    This one CONFIG object controls the whole game: colors, fonts,
-   layout, the guess categories/columns, and the roster of
-   battlesuits. Change values here and reload the page — you never
-   need to touch the CSS or the game-logic code below.
+   layout, portraits, the guess categories/columns, and the roster
+   of battlesuits. Change values here and reload the page — you
+   never need to touch the CSS or the game-logic code below.
 ================================================================= */
 const CONFIG = {
 
@@ -236,84 +326,337 @@ const CONFIG = {
     title: "Valkyrindle",
     subtitle: "Guess today's Honkai Impact 3rd battlesuit. Every guess reveals how close you are.",
     inputPlaceholder: "Type a battlesuit name…",
-    footerNote: "Fan-made prototype — data is hand-entered and may not perfectly match the current in-game roster. Edit CONFIG.roster below to fix or expand it.",
+    footerNote: "Fan-made prototype with help from Claude AI :) - If you see any mistakes or have any feedback, please let me know! Contact me at Turnips.Theory@gmail.com.",
+    tabs: { daily: "Daily Challenge", endless: "Endless Mode" },
   },
 
   // ---------------- 2. COLORS ----------------
-  // Any valid CSS color works: "#4FD8EB", "rgb(79,216,235)", "cyan", etc.
   theme: {
-    bg:        "#0A0D14",  // page background base color
-    panel:     "#111623",  // guess cards / input background
-    panelAlt:  "#161D2E",  // autocomplete dropdown background
-    line:      "#262f45",  // borders
-    accent1:   "#4FD8EB",  // "close" hint color + primary accent (buttons, focus ring)
-    accent2:   "#E8B54D",  // "exact match" color + secondary accent
-    danger:    "#E1495A",  // used for invalid-guess flash
-    text:      "#E7EDF7",  // main text
-    textDim:   "#8993AC",  // secondary/dim text
+    bg:        "#0A0D14",
+    panel:     "#111623",
+    panelAlt:  "#161D2E",
+    line:      "#262f45",
+    accent1:   "#4FD8EB",
+    accent2:   "#E8B54D",
+    danger:    "#E1495A",
+    text:      "#E7EDF7",
+    textDim:   "#8993AC",
   },
 
-  // Background behind the whole page. Use any CSS `background` value:
-  // - solid color: "background: #0A0D14;"
-  // - your own image: "background: url('https://example.com/bg.jpg') center/cover;"
-  // - the default radial glow (matches theme colors automatically):
-  backgroundStyle: "radial-gradient(1200px 600px at 50% -10%, #16233a 0%, #0A0D14 60%), #0A0D14",
+  // Background behind the whole page. Just the VALUE of a CSS
+  // `background` property (no "background:" prefix, no semicolon).
+  backgroundStyle: "url('https://act-webstatic.hoyoverse.com/upload/contentweb/2022/09/08/025dd263343936c583ff1865bc19ff1e_8507352016314129974.png') center/cover",
 
   // ---------------- 3. FONTS ----------------
   fonts: {
-    display: "'Rajdhani', sans-serif", // headings, buttons, column labels
-    body:    "'Inter', sans-serif",     // everything else
-    // Remember: if you change these, also update the Google Fonts
-    // <link> tag in <head> to actually load the new font files.
+    display: "'Rajdhani', sans-serif",
+    body:    "'Inter', sans-serif",
   },
 
   // ---------------- 4. LAYOUT ----------------
   layout: {
-    maxWidth: "720px",   // overall board width
-    radius:   "6px",     // corner rounding on cards/buttons/inputs
+    maxWidth: "720px",
+    radius:   "6px",
     cardMinHeight: "52px",
+
+    // Semi-transparent glass panel behind all the game content, so
+    // text stays readable over a background image.
+    overlay: {
+      enabled: true,
+      color: "rgba(10, 13, 20, 0.75)", // panel color + transparency (0 = see-through, 1 = solid)
+      blur: "8px",                      // frosted-glass blur behind the panel
+      radius: "18px",
+      padding: "32px 28px",
+    },
   },
 
-  // ---------------- 5. CATEGORIES (the guess columns) ----------------
-  // Add, remove, reorder, or rename columns freely. Each category needs:
-  //   key      - must match a field name used in every roster entry below
-  //   label    - column header text shown to players
-  //   compare  - "exact"  -> just checks if values are identical
-  //              "ordered"-> also shows a ↑/↓ hint using the `order` list
-  //                          (use this for anything with a real ranking,
-  //                          like rarity)
-  //   order    - only needed when compare is "ordered": list values from
-  //              lowest to highest
+  // ---------------- 5. PORTRAITS ----------------
+  images: {
+    enabled: true,
+    shape: "circle",
+    size: "56px",
+    dropdownSize: "34px",
+  },
+
+  // ---------------- 6. CATEGORIES (the guess columns) ----------------
   categories: [
     { key: "owner",   label: "Character", compare: "exact" },
     { key: "type",    label: "Type",      compare: "exact" },
     { key: "weapon",  label: "Weapon",    compare: "exact" },
     { key: "faction", label: "Faction",   compare: "exact" },
-    { key: "rarity",  label: "Rarity",    compare: "ordered", order: ["A", "S", "SS", "SSS"] },
+    { key: "rank",    label: "Rank",      compare: "exact" },
+    { key: "version", label: "Version",  compare: "ordered", order: ["1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.8", "1.9", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "2.8", "2.9", "3.0", "3.1", "3.2", "3.3", "3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "4.0", "4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", "4.8", "4.9", "5.0", "5.1", "5.2", "5.3", "5.4", "5.5", "5.6", "5.7", "5.8", "5.9", "6.0", "6.1", "6.2", "6.3", "6.4", "6.5", "6.6", "6.7", "6.8", "6.9", "7.0", "7.1", "7.2", "7.3", "7.4", "7.5", "7.6", "7.7", "7.8", "7.9", "8.0", "8.1", "8.2", "8.3", "8.4", "8.5", "8.6", "8.7", "8.8", "8.9"] },
+    ],
+
+  // ---------------- 7. ROSTER (battlesuits) ----------------
+  roster: [
+    //Kiana Kaslana
+    {name: "White Comet", owner: "Kiana Kaslana", type: "MECH", weapon: "Pistols", faction: "St. Freya", version: "1.8", rank: "B"},
+    {name: "Valkyrie Ranger", owner: "Kiana Kaslana", type: "MECH", weapon: "Pistols", faction: "St. Freya", version: "1.8", rank: "A"},
+    {name: "Void Drifter", owner: "Kiana Kaslana", type: "MECH", weapon: "Pistols", faction: "St. Freya", version: "3.3", rank: "A"},
+    {name: "Divine Prayer", owner: "Kiana Kaslana", type: "PSY", weapon: "Pistols", faction: "Schicksal / St. Freya", version: "1.8", rank: "A"},
+    {name: "Knight Moonbeam", owner: "Kiana Kaslana", type: "BIO", weapon: "Pistols", faction: "Schicksal", version: "1.8", rank: "S"},
+    {name: "Herrscher of the Void", owner: "Kiana Kaslana", type: "BIO", weapon: "Pistols", faction: "Herrscher / Schicksal", version: "2.7", rank: "S"},
+    {name: "Herrscher of Flamescion", owner: "Kiana Kaslana", type: "PSY", weapon: "Pistols", faction: "Herrscher / St. Freya", version: "5.0", rank: "S"},
+    {name: "Herrscher of Finality", owner: "Kiana Kaslana", type: "IMG", weapon: "Pistols", faction: "Herrscher", version: "6.4", rank: "S"},
+    {name: "Ba-Dum! Fiery Wishing Star", owner: "Kiana Kaslana", type: "SD", weapon: "Pistols", faction: "Other / Part 2", version: "8.1", rank: "S"},
+    //Raiden Mei
+    {name: "Crimson Impulse", owner: "Raiden Mei", type: "BIO", weapon: "Katana", faction: "St. Freya", version: "1.8", rank: "B"},
+    {name: "Valkyrie Bladestrike", owner: "Raiden Mei", type: "BIO", weapon: "Katana", faction: "St. Freya", version: "1.8", rank: "A"},
+    {name: "Striker Fulminata", owner: "Raiden Mei", type: "BIO", weapon: "Katana", faction: "Schicksal / St. Freya", version: "3.0", rank: "A"},
+    {name: "Shadow Dash", owner: "Raiden Mei", type: "MECH", weapon: "Katana", faction: "St. Freya", version: "1.8", rank: "A"},
+    {name: "Danzai Spectramancer", owner: "Raiden Mei", type: "MECH", weapon: "Katana", faction: "St. Freya", version: "4.2", rank: "A"},
+    {name: "Lightning Empress", owner: "Raiden Mei", type: "PSY", weapon: "Katana", faction: "Schicksal", version: "1.8", rank: "S"},
+    {name: "Herrscher of Thunder", owner: "Raiden Mei", type: "PSY", weapon: "Katana", faction: "Herrscher", version: "4.1", rank: "S"},
+    {name: "Herrscher of Origin", owner: "Raiden Mei", type: "IMG", weapon: "Katana", faction: "Herrscher / St. Freya", version: "6.4", rank: "S"},
+    {name: "Xentinel · Dawnbearing Crescent", owner: "Raiden Mei", type: "MECH", weapon: "Katana", faction: "Other / Part 2", version: "8.7", rank: "S"},
+    //Bronya Zaychik
+    {name: "Valkyrie Chariot", owner: "Bronya Zaychik", type: "PSY", weapon: "Cannons", faction: "St. Freya", version: "1.8", rank: "B"},
+    {name: "Snowy Sniper", owner: "Bronya Zaychik", type: "BIO", weapon: "Cannons", faction: "St. Freya", version: "1.8", rank: "A"},
+    {name: "Yamabuki Armor", owner: "Bronya Zaychik", type: "PSY", weapon: "Cannons", faction: "Anti-Entropy", version: "1.8", rank: "A"},
+    {name: "Drive Kometa", owner: "Bronya Zaychik", type: "PSY", weapon: "Cannons", faction: "Anti-Entropy", version: "3.1", rank: "A"},
+    {name: "Wolf's Dawn", owner: "Bronya Zaychik", type: "PSY", weapon: "Cannons", faction: "Anti-Entropy / St. Freya", version: "2.2", rank: "A"},
+    {name: "Dimension Breaker", owner: "Bronya Zaychik", type: "MECH", weapon: "Cannons", faction: "Anti-Entropy", version: "1.8", rank: "S"},
+    {name: "Black Nucleus", owner: "Bronya Zaychik", type: "BIO", weapon: "Cannons", faction: "Anti-Entropy", version: "2.2", rank: "S"},
+    {name: "Herrscher of Reason", owner: "Bronya Zaychik", type: "MECH", weapon: "Cannons", faction: "Herrscher / Anti-Entropy", version: "3.3", rank: "S"},
+    {name: "Haxxor Bunny", owner: "Bronya Zaychik", type: "PSY", weapon: "Cannons", faction: "Captainverse", version: "4.7", rank: "A"},
+    {name: "Silverwing: N-EX", owner: "Bronya Zaychik", type: "BIO", weapon: "Cannons", faction: "Anti-Entropy", version: "5.4", rank: "S"},
+    {name: "Herrscher of Truth", owner: "Bronya Zaychik", type: "IMG", weapon: "Cannons", faction: "Herrscher / Anti-Entropy", version: "6.3", rank: "S"},
+    //Murata Himeko
+    {name: "Battle Storm", owner: "Murata Himeko", type: "BIO", weapon: "Greatsword", faction: "St. Freya", version: "1.8", rank: "B"},
+    {name: "Valkyrie Triumph", owner: "Murata Himeko", type: "BIO", weapon: "Greatsword", faction: "Schicksal / St. Freya", version: "1.8", rank: "A"},
+    {name: "Scarlet Fusion", owner: "Murata Himeko", type: "MECH", weapon: "Greatsword", faction: "Schicksal / St. Freya", version: "1.8", rank: "A"},
+    {name: "Blood Rose", owner: "Murata Himeko", type: "PSY", weapon: "Greatsword", faction: "Schicksal", version: "1.8", rank: "S"},
+    {name: "Kriegsmesser", owner: "Murata Himeko", type: "PSY", weapon: "Greatsword", faction: "Captainverse", version: "2.7", rank: "A"},
+    {name: "Vermilion Knight: Eclipse", owner: "Murata Himeko", type: "MECH", weapon: "Greatsword", faction: "St. Freya", version: "2.8", rank: "S"},
+    //Yae Sakura
+    {name: "Gyakushinn Miko", owner: "Yae Sakura", type: "BIO", weapon: "Katana", faction: "Schicksal", version: "2.0", rank: "A"},
+    {name: "Goushinnso Memento", owner: "Yae Sakura", type: "MECH", weapon: "Katana", faction: "Flame-Chaser / Fire Moth", version: "2.0", rank: "S"},
+    {name: "Flame Sakitama", owner: "Yae Sakura", type: "BIO", weapon: "Katana", faction: "Schicksal / Shenzhou", version: "2.2", rank: "A"},
+    {name: "Darkbolt Jonin", owner: "Yae Sakura", type: "BIO", weapon: "Katana", faction: "Captainverse", version: "3.6", rank: "A"},
+    //Theresa Apocalypse
+    {name: "Valkyrie Pledge", owner: "Theresa Apocalypse", type: "PSY", weapon: "Cross", faction: "Schicksal / St. Freya", version: "2.2", rank: "A"},
+    {name: "Violet Executer", owner: "Theresa Apocalypse", type: "MECH", weapon: "Cross", faction: "Schicksal", version: "2.2", rank: "S"},
+    {name: "Twilight Paladin", owner: "Theresa Apocalypse", type: "MECH", weapon: "Cross", faction: "Schicksal", version: "3.4", rank: "S"},
+    {name: "Sakuno Rondo", owner: "Theresa Apocalypse", type: "PSY", weapon: "Cross", faction: "Schicksal", version: "2.2", rank: "A"},
+    {name: "Celestial Hymn", owner: "Theresa Apocalypse", type: "BIO", weapon: "Cross", faction: "Schicksal", version: "2.2", rank: "S"},
+    {name: "Luna Kindred", owner: "Theresa Apocalypse", type: "BIO", weapon: "Cross", faction: "Captainverse", version: "2.6", rank: "A"},
+    {name: "Starlit Astrologos", owner: "Theresa Apocalypse", type: "BIO", weapon: "Cross", faction: "Captainverse", version: "4.0", rank: "A"},
+    {name: "Lunar Vow: Crimson Love", owner: "Theresa Apocalypse", type: "PSY", weapon: "Cross", faction: "Schicksal", version: "7.0", rank: "S"},
+    {name: "Schicksal's Imperative", owner: "Theresa Apocalypse", type: "QUA", weapon: "Cross", faction: "Schicksal", version: "7.7", rank: "S"},
+    //Fu Hua
+    {name: "Valkyrie Accipiter", owner: "Fu Hua", type: "PSY", weapon: "Gauntlets", faction: "St. Freya", version: "2.2", rank: "A"},
+    {name: "Hawk of the Fog", owner: "Fu Hua", type: "PSY", weapon: "Gauntlets", faction: "St. Freya", version: "3.5", rank: "A"},
+    {name: "Phoenix", owner: "Fu Hua", type: "PSY", weapon: "Gauntlets", faction: "Shenzhou", version: "2.2", rank: "S"},
+    {name: "Night Squire", owner: "Fu Hua", type: "BIO", weapon: "Gauntlets", faction: "Schicksal", version: "2.3", rank: "A"},
+    {name: "Shadow Knight", owner: "Fu Hua", type: "MECH", weapon: "Gauntlets", faction: "Schicksal", version: "2.6", rank: "S"},
+    {name: "Azure Empyrea", owner: "Fu Hua", type: "PSY", weapon: "Gauntlets", faction: "Shenzhou", version: "3.7", rank: "S"},
+    {name: "Herrscher of Sentience", owner: "Fu Hua", type: "BIO", weapon: "Gauntlets", faction: "Herrscher", version: "4.6", rank: "S"},
+    {name: "Fenghuang of Vicissitude", owner: "Fu Hua", type: "BIO", weapon: "Gauntlets", faction: "Flame-Chaser / Fire Moth", version: "7.2", rank: "S"},
+    //Kallen Kaslana
+    {name: "Ritual Imayoh", owner: "Kallen Kaslana", type: "MECH", weapon: "Pistols", faction: "Schicksal", version: "2.2", rank: "A"},
+    {name: "Sixth Serenade", owner: "Kallen Kaslana", type: "PSY", weapon: "Pistols", faction: "Schicksal", version: "2.3", rank: "S"},
+    {name: "Sündenjäger", owner: "Kallen Kaslana", type: "MECH", weapon: "Pistols", faction: "Captainverse", version: "2.6", rank: "A"},
+    //Rita Rossweisse
+    {name: "Umbral Rose", owner: "Rita Rossweisse", type: "PSY", weapon: "Scythe", faction: "Schicksal", version: "2.8", rank: "A"},
+    {name: "Phantom Iron", owner: "Rita Rossweisse", type: "MECH", weapon: "Scythe", faction: "Schicksal", version: "3.0", rank: "A"},
+    {name: "Argent Knight: Artemis", owner: "Rita Rossweisse", type: "BIO", weapon: "Scythe", faction: "Schicksal", version: "3.0", rank: "S"},
+    {name: "Fallen Rosemary", owner: "Rita Rossweisse", type: "QUA", weapon: "Scythe", faction: "Captainverse", version: "4.2", rank: "S"},
+    {name: "Spina Astera", owner: "Rita Rossweisse", type: "MECH", weapon: "Scythe", faction: "Schicksal", version: "5.5", rank: "S"},
+    {name: "Miss Espionage", owner: "Rita Rossweisse", type: "IMG", weapon: "Scythe", faction: "Captainverse", version: "8.6", rank: "S"},
+    //Seele Vollerei
+    {name: "Swallowtail Phantasm", owner: "Seele Vollerei", type: "QUA", weapon: "Scythe", faction: "St. Freya", version: "3.2", rank: "A"},
+    {name: "Stygian Nymph", owner: "Seele Vollerei", type: "QUA", weapon: "Scythe", faction: "St. Freya", version: "3.5", rank: "S"},
+    {name: "Starchasm Nyx", owner: "Seele Vollerei", type: "QUA", weapon: "Scythe", faction: "Other", version: "4.8", rank: "S"},
+    {name: "Herrscher of Rebirth", owner: "Seele Vollerei", type: "PSY", weapon: "Scythe", faction: "Herrscher", version: "6.8", rank: "S"},
+    {name: "Wings of Panacea", owner: "Seele Vollerei", type: "SD", weapon: "Scythe", faction: "Other / Part 2", version: "8.9", rank: "S"},
+    //Liliya Olenyeva
+    {name: "Blueberry Blitz", owner: "Liliya Olenyeva", type: "MECH", weapon: "Greatsword", faction: "Anti-Entropy", version: "3.1", rank: "A"},
+    //Rozaliya Olenyeva
+    {name: "Molotov Cherry", owner: "Rozaliya Olenyeva", type: "PSY", weapon: "Greatsword", faction: "Anti-Entropy", version: "3.1", rank: "S"},
+    {name: "Fervent Tempo Δ", owner: "Rozaliya Olenyeva", type: "PSY", weapon: "Greatsword", faction: "Captainverse", version: "4.3", rank: "S"},
+    //Durandal
+    {name: "Valkyrie Gloria", owner: "Durandal", type: "QUA", weapon: "Lance", faction: "Schicksal", version: "3.8", rank: "A"},
+    {name: "Bright Knight: Excelsis", owner: "Durandal", type: "MECH", weapon: "Lance", faction: "Schicksal", version: "3.9", rank: "S"},
+    {name: "Dea Anchora", owner: "Durandal", type: "BIO", weapon: "Lance", faction: "Schicksal", version: "4.4", rank: "S"},
+    {name: "Palatinus Equinox", owner: "Durandal", type: "IMG", weapon: "Lance", faction: "Schicksal", version: "5.5", rank: "S"},
+    {name: "Reign Solaris", owner: "Durandal", type: "IMG", weapon: "Javelins", faction: "Schicksal / Part 2", version: "8.0", rank: "S"},
+    //Asuka
+    {name: "Blazing Hope", owner: "Asuka", type: "BIO", weapon: "Lance", faction: "NERV", version: "4.5", rank: "A"},
+    //Fischl
+    {name: "Prinzessin der Verurteilung!", owner: "Fischl", type: "BIO", weapon: "Bow", faction: "Schicksal", version: "4.9", rank: "A"},
+    //Elysia
+    {name: "Miss Pink Elf♪", owner: "Elysia", type: "PSY", weapon: "Bow", faction: "Flame-Chaser / Fire Moth", version: "5.1", rank: "S"},
+    {name: "Herrscher of Human: Ego", owner: "Elysia", type: "PSY", weapon: "Bow", faction: "Herrscher / Flame-Chaser / Fire Moth", version: "6.0", rank: "S"},
+    {name: "Hi♪ Love Elf♥", owner: "Elysia", type: "SD", weapon: "Bow", faction: "Flame-Chaser / Fire Moth", version: "8.5", rank: "S"},
+    //Natasha Cioara
+    {name: "Midnight Absinthe", owner: "Natasha Cioara", type: "IMG", weapon: "Bow", faction: "World Serpent", version: "5.2", rank: "A"},
+    //Mobius
+    {name: "Infinite Ouroboros", owner: "Mobius", type: "MECH", weapon: "Cross", faction: "Flame-Chaser / Fire Moth", version: "5.2", rank: "S"},
+    //Carole Pepper
+    {name: "Sweet 'n' Spicy", owner: "Carole Pepper", type: "MECH", weapon: "Gauntlets", faction: "Anti-Entropy", version: "5.3", rank: "A"},
+    //Pardofelis
+    {name: "Reverist Calico", owner: "Pardofelis", type: "SD", weapon: "Chakram", faction: "Flame-Chaser / Fire Moth", version: "5.6", rank: "A"},
+    //Aponia
+    {name: "Disciplinary Perdition", owner: "Aponia", type: "BIO", weapon: "Chakram", faction: "Flame-Chaser / Fire Moth", version: "5.7", rank: "S"},
+    //Eden
+    {name: "Golden Diva", owner: "Eden", type: "IMG", weapon: "Pistols", faction: "Flame-Chaser / Fire Moth", version: "5.7", rank: "S"},
+    //Griseo
+    {name: "Starry Impression", owner: "Griseo", type: "PSY", weapon: "Cross", faction: "Flame-Chaser / Fire Moth", version: "5.8", rank: "A"},
+    {name: "Cosmic Expression", owner: "Griseo", type: "SD", weapon: "Cross", faction: "Flame-Chaser / Fire Moth", version: "7.1", rank: "A"},
+    //Vill-V
+    {name: "Helical Contraption", owner: "Vill-V", type: "QUA", weapon: "Cannons", faction: "Flame-Chaser / Fire Moth", version: "5.9", rank: "S"},
+    //Li Sushang
+    {name: "Jade Knight", owner: "Li Sushang", type: "PSY", weapon: "Gauntlets", faction: "Shenzhou", version: "6.1", rank: "S"},
+    {name: "Peregrine Sword", owner: "Li Sushang", type: "BIO", weapon: "Gauntlets", faction: "Shenzhou", version: "8.2", rank: "S"},
+    //Ai Hyperion Λ
+    {name: "Chrono Navi", owner: "Ai Hyperion Λ", type: "MECH", weapon: "Chakram", faction: "St. Freya", version: "6.2", rank: "A"},
+    //Susannah Manatt
+    {name: "Valkyrie Quicksand", owner: "Susannah Manatt", type: "QUA", weapon: "Chakram", faction: "Schicksal", version: "6.5", rank: "A"},
+    //PROMETHEUS
+    {name: "Terminal Aide 0017", owner: "PROMETHEUS", type: "IMG", weapon: "Gauntlets", faction: "Anti-Entropy", version: "6.6", rank: "A"},
+    //Misteln Schariac
+    {name: "Dreamweaver", owner: "Misteln Schariac", type: "MECH", weapon: "Javelins", faction: "Schicksal", version: "6.6", rank: "S"},
+    //Shigure Kira
+    {name: "Sugary Starburst", owner: "Shigure Kira", type: "MECH", weapon: "Pistols", faction: "Schicksal", version: "6.7", rank: "A"},
+    //Senadina
+    {name: "Deepspace Anchor: First Light", owner: "Senadina", type: "SD", weapon: "Drive Core", faction: "Mars", version: "7.3", rank: "S"},
+    //Coralie
+    {name: "Valkyrie Blastmetal", owner: "Coralie", type: "PSY", weapon: "Rocket Hammer", faction: "Mars", version: "7.3", rank: "A"},
+    {name: "Behold! Fate-Defying Dragon", owner: "Coralie", type: "MECH", weapon: "Rocket Hammer", faction: "Mars", version: "8.4", rank: "S"},
+    //Helia
+    {name: "Valkyrie Boltstorm", owner: "Helia", type: "MECH", weapon: "Crossbow", faction: "Mars", version: "7.3", rank: "A"},
+    //Lantern
+    {name: "Lone Destruction: Shadowchaser", owner: "Lantern", type: "PSY", weapon: "Crossbow", faction: "Mars", version: "7.5", rank: "S"},
+    //Thelema
+    {name: "Mad Pleasure: Shadowbringer", owner: "Thelema", type: "MECH", weapon: "Chain Blades", faction: "Mars", version: "7.4", rank: "S"},
+    //Vita
+    {name: "Lone Planetfarer", owner: "Vita", type: "MECH", weapon: "Drive Core", faction: "Mars / Langqiu", version: "7.8", rank: "S"},
+    //Helia
+    {name: "Planar Armament: Warped Spacetime", owner: "Helia", type: "BIO", weapon: "Crossbow", faction: "Mars / Langqiu", version: "8.3", rank: "S"},
+    //Sparkle
+    {name: "Thousand-Faced Maestro: Cameo!", owner: "Sparkle", type: "QUA", weapon: "Drive Core", faction: "Astral Express / Collaboration", version: "7.9", rank: "S"},
+    //Sirin
+    {name: "Miracle ☆ Magical Girl", owner: "Sirin", type: "MECH", weapon: "Chakram", faction: "Captainverse", version: "6.9", rank: "S"},
+    //Songque
+    {name: "Jovial Deception: Shadowdimmer", owner: "Songque", type: "SD", weapon: "Trick Staff", faction: "Mars / Langqiu", version: "7.6", rank: "S"},
   ],
 
-  // ---------------- 6. ROSTER (battlesuits) ----------------
-  // `name` is what players type/guess (the battlesuit itself, e.g. a
-  // specific outfit — not just the character). Every other field must
-  // match a `key` from CONFIG.categories above. Add as many as you like.
-  roster: [
-    { name: "Knight Moonbeam",              owner: "Kiana Kaslana",      type: "Physical",  weapon: "Twin Blades", faction: "Schicksal",     rarity: "S" },
-    { name: "Herrscher of the Void",        owner: "Kiana Kaslana",      type: "Imaginary", weapon: "Twin Blades", faction: "Schicksal",     rarity: "SSS" },
-    { name: "Valkyrie Chariot",             owner: "Kiana Kaslana",      type: "Physical",  weapon: "Twin Blades", faction: "Schicksal",     rarity: "A" },
-    { name: "Herrscher of Origin",          owner: "Kiana Kaslana",      type: "Imaginary", weapon: "Twin Blades", faction: "Schicksal",     rarity: "SSS" },
-    { name: "Bright Knight: Excelsis",      owner: "Raiden Mei",         type: "Physical",  weapon: "Sword",       faction: "Schicksal",     rarity: "SSS" },
-    { name: "Herrscher of Thunder",         owner: "Raiden Mei",         type: "Thunder",   weapon: "Gauntlets",   faction: "Schicksal",     rarity: "SSS" },
-    { name: "Valkyrie Triumph",             owner: "Raiden Mei",         type: "Fire",      weapon: "Sword",       faction: "Schicksal",     rarity: "A" },
-    { name: "Herrscher of Reason",          owner: "Bronya Zaychik",     type: "Quantum",   weapon: "Umbrella",    faction: "Anti-Entropy",  rarity: "SSS" },
-    { name: "Silverwing: Prometheus",       owner: "Bronya Zaychik",     type: "Physical",  weapon: "Greatsword",  faction: "Anti-Entropy",  rarity: "S" },
-    { name: "Bunny Bronya",                 owner: "Bronya Zaychik",     type: "Ice",       weapon: "Gauntlets",   faction: "Anti-Entropy",  rarity: "A" },
-    { name: "Herrscher of Sentience",       owner: "Fu Hua",             type: "Imaginary", weapon: "Twin Blades", faction: "Schicksal",     rarity: "SSS" },
-    { name: "Sakura Yushou",                owner: "Fu Hua",             type: "Fire",      weapon: "Katana",      faction: "Schicksal",     rarity: "S" },
-    { name: "Beatrice",                     owner: "Fu Hua",             type: "Ice",       weapon: "Twin Blades", faction: "Schicksal",     rarity: "S" },
-    { name: "Valkyrie Ranger",              owner: "Rita Rossweisse",    type: "Physical",  weapon: "Twin Pistols",faction: "World Serpent", rarity: "SSS" },
-    { name: "Miss Pole Dance",              owner: "Rita Rossweisse",    type: "Fire",      weapon: "Whip",        faction: "World Serpent", rarity: "A" },
-    { name: "Dimension Slayer: Argent Knight", owner: "Seele Vollerei",  type: "Physical",  weapon: "Scythe",      faction: "Anti-Entropy",  rarity: "S" },
-  ],
+  // ---------------- 8. PORTRAIT IMAGES ----------------
+  // Add one line per battlesuit, matching its `name` above EXACTLY.
+  // Anything not listed here shows a placeholder circle with initials.
+  imageOverrides: {
+    "White Comet": "https://static.wikia.nocookie.net/hoducks/images/6/64/Valkyrie_Ranger.png/revision/latest?cb=20240212195021",
+    "Valkyrie Ranger": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/6/63/White_Comet.png/revision/latest?cb=20230805224303",
+    "Void Drifter": "https://marisaimpact.com/images/valkfull/vd.png",
+    "Divine Prayer": "https://static.wikia.nocookie.net/hoducks/images/9/93/Divine_Prayer.png/revision/latest?cb=20240212195023",
+    "Knight Moonbeam": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/b7/Knight_Moonbeam_%28Thumbnail%29.png/revision/latest?cb=20240211114957",
+    "Herrscher of the Void": "https://marisaimpact.com/images/valkfull/Herrscher%20of%20the%20Void.png",
+    "Herrscher of Flamescion": "https://marisaimpact.com/images/valkfull/hofs.webp",
+    "Herrscher of Finality": "https://marisaimpact.com/images/valkfull/kiana_hofi.webp",
+    "Ba-Dum! Fiery Wishing Star": "https://marisaimpact.com/images/valkfull/bw.webp",
+    "Crimson Impulse": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/c/c6/Crimson_Impulse.png/revision/latest/scale-to-width-down/732?cb=20230805234020",
+    "Valkyrie Bladestrike": "https://static.wikia.nocookie.net/hoducks/images/3/39/Valkyrie_Bladestrike.png/revision/latest?cb=20201225132241",
+    "Striker Fulminata": "https://marisaimpact.com/images/valkfull/Striker%20Fulminata.png",
+    "Shadow Dash": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/92/Shadow_Dash.png/revision/latest?cb=20230805234819",
+    "Danzai Spectramancer": "https://marisaimpact.com/images/valkfull/danzai.webp",
+    "Lightning Empress": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/4d/Lightning_Empress.png/revision/latest/scale-to-width-down/960?cb=20230805235902",
+    "Herrscher of Thunder": "https://marisaimpact.com/images/valkfull/hot.webp",
+    "Herrscher of Origin": "https://ldbndupsaerjtcndwoqq.supabase.co/storage/v1/object/public/valkfull/mei_hoo.webp",
+    "Xentinel · Dawnbearing Crescent": "https://marisaimpact.com/images/valkfull/newmei.png",
+    "Valkyrie Chariot": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/45/Blue_Sky_%28Figure%29.png/revision/latest/scale-to-width-down/250?cb=20230503193522",
+    "Snowy Sniper": "https://static.tvtropes.org/pmwiki/pub/images/snowy_sniper_outfit.png",
+    "Yamabuki Armor": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/90/Yamabuki_Armor_%28Thumbnail%29.png/revision/latest/scale-to-width-down/232?cb=20240211112242",
+    "Drive Kometa": "https://marisaimpact.com/images/valkfull/dk.png",
+    "Wolf's Dawn": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/d/d1/Wolf%27s_Dawn.png/revision/latest/scale-to-width-down/404?cb=20230806011721",
+    "Dimension Breaker": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/8/8e/Dimension_Breaker.png/revision/latest/scale-to-width-down/400?cb=20230806010819",
+    "Black Nucleus": "https://marisaimpact.com/images/valkfull/Black%20Nucleus.png",
+    "Herrscher of Reason": "https://marisaimpact.com/images/valkfull/hor.png",
+    "Haxxor Bunny": "https://marisaimpact.com/images/valkfull/hb.webp",
+    "Silverwing: N-EX": "https://marisaimpact.com/images/valkfull/sw.webp",
+    "Herrscher of Truth": "https://ldbndupsaerjtcndwoqq.supabase.co/storage/v1/object/public/valkfull/bronya_hotr.webp",
+    "Battle Storm": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/c/c5/Battle_Storm_%28Thumbnail%29.png/revision/latest/scale-to-width-down/232?cb=20240211111140",
+    "Valkyrie Triumph": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/02/Valkyrie_Triumph.png/revision/latest/scale-to-width-down/960?cb=20230806014905",
+    "Scarlet Fusion": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/5/54/Scarlet_Fusion.png/revision/latest/scale-to-width-down/732?cb=20230806015032",
+    "Blood Rose": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/4/4f/Blood_Rose.png/revision/latest?cb=20230806015252",
+    "Kriegsmesser": "https://marisaimpact.com/images/valkfull/Kriegsmesser.png",
+    "Vermilion Knight: Eclipse": "https://marisaimpact.com/images/valkfull/Vermilion%20Knight.png",
+    "Gyakushinn Miko": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/37/Sublime_Lotus_%28Figure%29.png/revision/latest/scale-to-width-down/612?cb=20230806002410",
+    "Goushinnso Memento": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/9/95/Goushinnso_Memento.png/revision/latest/scale-to-width-down/340?cb=20230806002607",
+    "Flame Sakitama": "https://marisaimpact.com/images/valkfull/Flame%20Sakitama.png",
+    "Darkbolt Jonin": "https://marisaimpact.com/images/valkfull/dj.png",
+    "Valkyrie Pledge": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/a/a4/Valkyrie_Pledge.png/revision/latest/scale-to-width-down/660?cb=20230806020214",
+    "Violet Executer": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/7/7b/Violet_Executer.png/revision/latest?cb=20230806021251",
+    "Twilight Paladin": "https://marisaimpact.com/images/valkfull/tp.png",
+    "Sakuno Rondo": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/f/fa/Sakuno_Rondo.png/revision/latest?cb=20230806031622",
+    "Celestial Hymn": "https://marisaimpact.com/images/valkfull/Celestial%20Hymn.png",
+    "Luna Kindred": "https://marisaimpact.com/images/valkfull/Luna%20Kindred.png",
+    "Starlit Astrologos": "https://marisaimpact.com/images/valkfull/sa.webp",
+    "Lunar Vow: Crimson Love": "https://marisaimpact.com/images/valkfull/lunar_vow.png",
+    "Schicksal's Imperative": "https://marisaimpact.com/images/valkfull/teri_simp.webp",
+    "Valkyrie Accipiter": "https://marisaimpact.com/images/valkfull/Valkyrie%20Accipiter.png",
+    "Hawk of the Fog": "https://marisaimpact.com/images/valkfull/hotf.png",
+    "Phoenix": "https://marisaimpact.com/images/valkfull/Phoenix.png",
+    "Night Squire": "https://marisaimpact.com/images/valkfull/Night%20Squire.png",
+    "Shadow Knight": "https://marisaimpact.com/images/valkfull/Shadow%20Knight.png",
+    "Azure Empyrea": "https://marisaimpact.com/images/valkfull/ae.webp",
+    "Herrscher of Sentience": "https://marisaimpact.com/images/valkfull/hos.webp",
+    "Fenghuang of Vicissitude": "https://marisaimpact.com/images/valkfull/fov.webp",
+    "Ritual Imayoh": "https://marisaimpact.com/images/valkfull/Ritual%20Imayoh.png",
+    "Sixth Serenade": "https://marisaimpact.com/images/valkfull/Sixth%20Serenade.png",
+    "Sündenjäger": "https://marisaimpact.com/images/valkfull/Sundenjager.png",
+    "Umbral Rose": "https://marisaimpact.com/images/valkfull/Umbral%20Rose.png",
+    "Phantom Iron": "https://marisaimpact.com/images/valkfull/Phantom%20Iron.png",
+    "Argent Knight: Artemis": "https://marisaimpact.com/images/valkfull/Argent%20Knight.png",
+    "Fallen Rosemary": "https://marisaimpact.com/images/valkfull/fr.webp",
+    "Spina Astera": "https://marisaimpact.com/images/valkfull/spa2.webp",
+    "Miss Espionage": "https://marisaimpact.com/images/valkfull/agent_rita.png",
+    "Swallowtail Phantasm": "https://marisaimpact.com/images/valkfull/sp.png",
+    "Stygian Nymph": "https://marisaimpact.com/images/valkfull/sn.png",
+    "Starchasm Nyx": "https://marisaimpact.com/images/valkfull/nyx.webp",
+    "Herrscher of Rebirth": "https://marisaimpact.com/images/valkfull/horb.webp",
+    "Wings of Panacea": "https://marisaimpact.com/images/valkfull/Seele%20Wings%20of%20Panacea.png",
+    "Blueberry Blitz": "https://marisaimpact.com/images/valkfull/bb.png",
+    "Molotov Cherry": "https://marisaimpact.com/images/valkfull/mc.png",
+    "Fervent Tempo Δ": "https://marisaimpact.com/images/valkfull/ft.webp",
+    "Valkyrie Gloria": "https://marisaimpact.com/images/valkfull/vg.webp",
+    "Bright Knight: Excelsis": "https://marisaimpact.com/images/valkfull/bk.webp",
+    "Dea Anchora": "https://marisaimpact.com/images/valkfull/Dea_Anchora.webp",
+    "Palatinus Equinox": "https://marisaimpact.com/images/valkfull/pe.webp",
+    "Reign Solaris": "https://marisaimpact.com/images/valkfull/rs.webp",
+    "Blazing Hope": "https://marisaimpact.com/images/valkfull/asuka.webp",
+    "Prinzessin der Verurteilung!": "https://marisaimpact.com/images/valkfull/fischl.webp",
+    "Miss Pink Elf♪": "https://marisaimpact.com/images/valkfull/mpe.webp",
+    "Herrscher of Human: Ego": "https://marisaimpact.com/images/valkfull/hoh.webp",
+    "Hi♪ Love Elf♥": "https://marisaimpact.com/images/valkfull/mol.png",
+    "Midnight Absinthe": "https://marisaimpact.com/images/valkfull/raven.webp",
+    "Infinite Ouroboros": "https://marisaimpact.com/images/valkfull/mobius.webp",
+    "Sweet 'n' Spicy": "https://marisaimpact.com/images/valkfull/carole.webp",
+    "Reverist Calico": "https://marisaimpact.com/images/valkfull/pardo.webp",
+    "Disciplinary Perdition": "https://marisaimpact.com/images/valkfull/aponia.webp",
+    "Golden Diva": "https://marisaimpact.com/images/valkfull/eden.webp",
+    "Starry Impression": "https://marisaimpact.com/images/valkfull/si.webp",
+    "Cosmic Expression": "https://marisaimpact.com/images/valkfull/ce.webp",
+    "Helical Contraption": "https://marisaimpact.com/images/valkfull/villv.webp",
+    "Jade Knight": "https://marisaimpact.com/images/valkfull/sushang.webp",
+    "Peregrine Sword": "https://marisaimpact.com/images/valkfull/ps.png",
+    "Chrono Navi": "https://marisaimpact.com/images/valkfull/cn.webp",
+    "Valkyrie Quicksand": "https://marisaimpact.com/images/valkfull/vq.webp",
+    "Terminal Aide 0017": "https://marisaimpact.com/images/valkfull/prom.webp",
+    "Dreamweaver": "https://marisaimpact.com/images/valkfull/dw.webp",
+    "Sugary Starburst": "https://marisaimpact.com/images/valkfull/kira.webp",
+    "Deepspace Anchor: First Light": "https://marisaimpact.com/images/valkfull/Senadina.webp",
+    "Valkyrie Blastmetal": "https://marisaimpact.com/images/valkfull/Coralie.png",
+    "Behold! Fate-Defying Dragon": "https://marisaimpact.com/images/valkfull/scoralie.png",
+    "Valkyrie Boltstorm": "https://marisaimpact.com/images/valkfull/Helia.webp",
+    "Lone Destruction: Shadowchaser": "https://marisaimpact.com/images/valkfull/lantern.webp",
+    "Mad Pleasure: Shadowbringer": "https://marisaimpact.com/images/valkfull/thelema.webp",
+    "Lone Planetfarer": "https://marisaimpact.com/images/valkfull/vita.webp",
+    "Planar Armament: Warped Spacetime": "https://marisaimpact.com/images/valkfull/new%20helia.webp",
+    "Thousand-Faced Maestro: Cameo!": "https://marisaimpact.com/images/valkfull/sparkle.webp",
+    "Miracle ☆ Magical Girl": "https://marisaimpact.com/images/valkfull/sirin.webp",
+    "Jovial Deception: Shadowdimmer": "https://marisaimpact.com/images/valkfull/jd.webp",
+  },
 };
 
 /* ================================================================
@@ -321,7 +664,7 @@ const CONFIG = {
    ============  anything below this line to customize  ============
    ================================================================ */
 
-// --- Apply CONFIG.theme / fonts / layout as CSS variables -------
+// --- Apply CONFIG values as CSS variables ---------------------------
 const root = document.documentElement.style;
 root.setProperty('--bg', CONFIG.theme.bg);
 root.setProperty('--panel', CONFIG.theme.panel);
@@ -338,112 +681,238 @@ root.setProperty('--font-body', CONFIG.fonts.body);
 root.setProperty('--max-width', CONFIG.layout.maxWidth);
 root.setProperty('--radius', CONFIG.layout.radius);
 root.setProperty('--card-min-height', CONFIG.layout.cardMinHeight);
+root.setProperty('--overlay-color', CONFIG.layout.overlay.enabled ? CONFIG.layout.overlay.color : 'transparent');
+root.setProperty('--overlay-blur', CONFIG.layout.overlay.enabled ? CONFIG.layout.overlay.blur : '0px');
+root.setProperty('--overlay-radius', CONFIG.layout.overlay.radius);
+root.setProperty('--overlay-padding', CONFIG.layout.overlay.padding);
+root.setProperty('--portrait-radius', CONFIG.images.shape === 'circle' ? '50%' : CONFIG.layout.radius);
+root.setProperty('--portrait-size-board', CONFIG.images.size);
+root.setProperty('--portrait-size-dropdown', CONFIG.images.dropdownSize);
 
-// --- Apply CONFIG.meta text --------------------------------------
+// --- Apply text ------------------------------------------------------
 document.getElementById('page-title').textContent = CONFIG.meta.title;
 document.getElementById('game-title').textContent = CONFIG.meta.title;
 document.getElementById('game-subtitle').textContent = CONFIG.meta.subtitle;
-document.getElementById('guess-input').placeholder = CONFIG.meta.inputPlaceholder;
 document.getElementById('footer-note').textContent = CONFIG.meta.footerNote;
+document.getElementById('tab-daily').textContent = CONFIG.meta.tabs.daily;
+document.getElementById('tab-endless').textContent = CONFIG.meta.tabs.endless;
 
-// --- Build the header row from CONFIG.categories ------------------
-const headerRow = document.getElementById('header-row');
-const nameHeader = document.createElement('div');
-nameHeader.textContent = "Battlesuit";
-headerRow.appendChild(nameHeader);
-CONFIG.categories.forEach(cat => {
+// --- Shared helpers ----------------------------------------------------
+function initials(name){
+  return name.split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+}
+
+function makePortrait(entry, sizeClass){
+  const wrap = document.createElement('div');
+  wrap.className = 'portrait ' + sizeClass;
+  if (!CONFIG.images.enabled) { wrap.style.display = 'none'; return wrap; }
+  const url = CONFIG.imageOverrides[entry.name];
+  if (url) {
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = entry.name;
+    img.onerror = () => { wrap.innerHTML = ''; wrap.textContent = initials(entry.name); };
+    wrap.appendChild(img);
+  } else {
+    wrap.textContent = initials(entry.name);
+  }
+  return wrap;
+}
+
+function makeCell(text, cls){
   const div = document.createElement('div');
-  div.textContent = cat.label;
-  headerRow.appendChild(div);
-});
+  div.className = 'cell ' + cls;
+  div.textContent = text;
+  return div;
+}
 
-// Grid columns: name column is wider, every category column is equal.
 const gridTemplate = `1.3fr repeat(${CONFIG.categories.length}, 1fr)`;
-headerRow.style.gridTemplateColumns = gridTemplate;
 
-// --- Pick today's answer (deterministic by date) -------------------
-function pickAnswer(){
+function buildHeaderRow(headerRowEl){
+  headerRowEl.innerHTML = '';
+  const nameHeader = document.createElement('div');
+  nameHeader.textContent = "Battlesuit";
+  headerRowEl.appendChild(nameHeader);
+  CONFIG.categories.forEach(cat => {
+    const div = document.createElement('div');
+    div.textContent = cat.label;
+    headerRowEl.appendChild(div);
+  });
+  headerRowEl.style.gridTemplateColumns = gridTemplate;
+}
+
+// --- Date / countdown helpers (used by Daily mode) ---------------------
+function todayKey(){
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+function msUntilNextMidnight(){
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+  return next - now;
+}
+function formatDuration(ms){
+  let totalSec = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(totalSec / 3600); totalSec %= 3600;
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+}
+function pickDailyAnswer(){
   const today = new Date();
   const seed = today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate();
   return CONFIG.roster[seed % CONFIG.roster.length];
 }
-const ANSWER = pickAnswer();
-let guessesMade = 0;
-let solved = false;
-const guessedNames = new Set();
+function pickRandomAnswer(excludeName){
+  const pool = excludeName ? CONFIG.roster.filter(c => c.name !== excludeName) : CONFIG.roster;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
-// --- Autocomplete ---------------------------------------------------
-const input = document.getElementById('guess-input');
-const autocomplete = document.getElementById('autocomplete');
+// --- localStorage for Daily mode (so a refresh doesn't lose progress) --
+const DAILY_STORAGE_KEY = 'valkyrindle_daily_v1';
+function loadDailyProgress(){
+  try {
+    const raw = localStorage.getItem(DAILY_STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (data.dateKey !== todayKey()) return null; // stale — new day, ignore it
+    return data;
+  } catch (e) { return null; }
+}
+function saveDailyProgress(state){
+  try {
+    localStorage.setItem(DAILY_STORAGE_KEY, JSON.stringify({
+      dateKey: todayKey(),
+      guesses: [...state.guessedNames],
+      solved: state.solved,
+    }));
+  } catch (e) { /* localStorage unavailable — game still works, just won't persist */ }
+}
 
-input.addEventListener('input', () => {
-  const q = input.value.trim().toLowerCase();
-  autocomplete.innerHTML = '';
-  if (!q) { autocomplete.style.display = 'none'; return; }
-  const matches = CONFIG.roster.filter(c =>
-    c.name.toLowerCase().includes(q) && !guessedNames.has(c.name)
-  ).slice(0, 6);
-  if (matches.length === 0) { autocomplete.style.display = 'none'; return; }
-  matches.forEach(c => {
-    const div = document.createElement('div');
-    div.textContent = c.name;
-    div.onclick = () => { input.value = c.name; autocomplete.style.display = 'none'; input.focus(); };
-    autocomplete.appendChild(div);
+// --- Build the DOM for one mode's section (Daily or Endless) -----------
+function buildSection(mode){
+  const section = document.createElement('div');
+
+  const form = document.createElement('form');
+  form.className = 'guess-form';
+  form.autocomplete = 'off';
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'guess-input';
+  input.placeholder = CONFIG.meta.inputPlaceholder;
+  const autocomplete = document.createElement('div');
+  autocomplete.className = 'autocomplete';
+  const button = document.createElement('button');
+  button.type = 'submit';
+  button.textContent = 'Guess';
+  form.append(input, autocomplete, button);
+
+  const guessCount = document.createElement('div');
+  guessCount.className = 'guess-count';
+
+  const boardWrap = document.createElement('div');
+  boardWrap.className = 'board-wrap';
+  const board = document.createElement('div');
+  board.className = 'board';
+  const headerRow = document.createElement('div');
+  headerRow.className = 'header-row';
+  board.appendChild(headerRow);
+  boardWrap.appendChild(board);
+  buildHeaderRow(headerRow);
+
+  const winBanner = document.createElement('div');
+  winBanner.className = 'win-banner';
+
+  section.append(form, guessCount, boardWrap, winBanner);
+
+  const ui = { section, input, autocomplete, form, guessCount, board, headerRow, winBanner };
+
+  if (mode === 'daily') {
+    const countdown = document.createElement('div');
+    countdown.className = 'countdown';
+    section.appendChild(countdown);
+    ui.countdown = countdown;
+  } else {
+    const playAgain = document.createElement('button');
+    playAgain.type = 'button';
+    playAgain.className = 'play-again-btn';
+    playAgain.textContent = 'New Battlesuit →';
+    const streak = document.createElement('div');
+    streak.className = 'streak';
+    streak.textContent = 'Solved: 0';
+    section.append(playAgain, streak);
+    ui.playAgain = playAgain;
+    ui.streak = streak;
+  }
+
+  return ui;
+}
+
+// --- Wire up guessing behavior for one mode's state ---------------------
+function wireSection(state){
+  const { ui } = state;
+
+  ui.input.addEventListener('input', () => {
+    const q = ui.input.value.trim().toLowerCase();
+    ui.autocomplete.innerHTML = '';
+    if (!q) { ui.autocomplete.style.display = 'none'; return; }
+    const matches = CONFIG.roster.filter(c =>
+      c.name.toLowerCase().includes(q) && !state.guessedNames.has(c.name)
+    ).slice(0, 6);
+    if (matches.length === 0) { ui.autocomplete.style.display = 'none'; return; }
+    matches.forEach(c => {
+      const item = document.createElement('div');
+      item.className = 'autocomplete-item';
+      item.appendChild(makePortrait(c, 'portrait-dropdown'));
+      const label = document.createElement('span');
+      label.textContent = c.name;
+      item.appendChild(label);
+      item.onclick = () => { ui.input.value = c.name; ui.autocomplete.style.display = 'none'; ui.input.focus(); };
+      ui.autocomplete.appendChild(item);
+    });
+    ui.autocomplete.style.display = 'block';
   });
-  autocomplete.style.display = 'block';
-});
 
-document.addEventListener('click', (e) => {
-  if (!autocomplete.contains(e.target) && e.target !== input) {
-    autocomplete.style.display = 'none';
+  ui.form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (state.solved) return;
+    const name = ui.input.value.trim();
+    const guess = CONFIG.roster.find(c => c.name.toLowerCase() === name.toLowerCase());
+    if (!guess) {
+      ui.input.style.borderColor = 'var(--danger)';
+      setTimeout(() => ui.input.style.borderColor = 'var(--line)', 600);
+      return;
+    }
+    if (state.guessedNames.has(guess.name)) return;
+    submitGuess(state, guess);
+    ui.input.value = '';
+    ui.autocomplete.style.display = 'none';
+  });
+
+  if (state.mode === 'endless') {
+    ui.playAgain.addEventListener('click', () => startNewEndlessRound(state));
   }
-});
+}
 
-// --- Handling a guess -------------------------------------------------
-document.getElementById('guess-form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  if (solved) return;
-
-  const name = input.value.trim();
-  const guess = CONFIG.roster.find(c => c.name.toLowerCase() === name.toLowerCase());
-
-  if (!guess) {
-    input.style.borderColor = 'var(--danger)';
-    setTimeout(() => input.style.borderColor = 'var(--line)', 600);
-    return;
-  }
-  if (guessedNames.has(guess.name)) return;
-
-  guessedNames.add(guess.name);
-  guessesMade++;
-  renderRow(guess);
-  input.value = '';
-  autocomplete.style.display = 'none';
-
-  if (guess.name === ANSWER.name) {
-    solved = true;
-    const banner = document.getElementById('win-banner');
-    banner.style.display = 'block';
-    banner.textContent = `Correct — it was ${ANSWER.name}! Solved in ${guessesMade} guess${guessesMade > 1 ? 'es' : ''}.`;
-  }
-  document.getElementById('guess-count').textContent =
-    solved ? '' : `Guesses: ${guessesMade}`;
-});
-
-// --- Rendering a guess row, built dynamically from CONFIG.categories --
-function renderRow(guess){
+function renderRow(state, guess){
   const row = document.createElement('div');
   row.className = 'guess-row';
   row.style.gridTemplateColumns = gridTemplate;
 
-  row.appendChild(makeCell(guess.name, guess.name === ANSWER.name ? 'match' : 'no-match', true));
+  const nameCell = document.createElement('div');
+  nameCell.className = 'cell name ' + (guess.name === state.answer.name ? 'match' : 'no-match');
+  nameCell.appendChild(makePortrait(guess, 'portrait-board'));
+  const nameLabel = document.createElement('span');
+  nameLabel.textContent = guess.name;
+  nameCell.appendChild(nameLabel);
+  row.appendChild(nameCell);
 
   CONFIG.categories.forEach(cat => {
     const guessVal = guess[cat.key];
-    const answerVal = ANSWER[cat.key];
+    const answerVal = state.answer[cat.key];
     let cls = 'no-match';
     let text = guessVal;
-
     if (guessVal === answerVal) {
       cls = 'match';
     } else if (cat.compare === 'ordered' && Array.isArray(cat.order)) {
@@ -457,15 +926,109 @@ function renderRow(guess){
     row.appendChild(makeCell(text, cls));
   });
 
-  document.getElementById('board').appendChild(row);
+  state.ui.board.appendChild(row);
 }
 
-function makeCell(text, cls, isName=false){
-  const div = document.createElement('div');
-  div.className = 'cell ' + cls + (isName ? ' name' : '');
-  div.textContent = text;
-  return div;
+function submitGuess(state, guess){
+  state.guessedNames.add(guess.name);
+  state.guessesMade++;
+  renderRow(state, guess);
+
+  if (guess.name === state.answer.name) {
+    state.solved = true;
+    state.ui.winBanner.style.display = 'block';
+    state.ui.winBanner.textContent =
+      `Correct — it was ${state.answer.name}! Solved in ${state.guessesMade} guess${state.guessesMade > 1 ? 'es' : ''}.`;
+
+    if (state.mode === 'daily') {
+      startCountdown(state);
+    } else {
+      state.streakCount = (state.streakCount || 0) + 1;
+      state.ui.streak.textContent = `Solved: ${state.streakCount}`;
+      state.ui.playAgain.style.display = 'inline-block';
+    }
+  }
+
+  state.ui.guessCount.textContent = state.solved ? '' : `Guesses: ${state.guessesMade}`;
+
+  if (state.mode === 'daily') saveDailyProgress(state);
 }
+
+// --- Daily-only: live countdown to the next local midnight --------------
+function startCountdown(state){
+  if (state.countdownTimer) clearInterval(state.countdownTimer);
+  const tick = () => {
+    const ms = msUntilNextMidnight();
+    if (ms <= 0) { clearInterval(state.countdownTimer); location.reload(); return; }
+    state.ui.countdown.textContent = `Next battlesuit in ${formatDuration(ms)}`;
+  };
+  tick();
+  state.countdownTimer = setInterval(tick, 1000);
+}
+
+// --- Endless-only: start a fresh round without reloading the page -------
+function startNewEndlessRound(state){
+  state.answer = pickRandomAnswer(state.answer ? state.answer.name : null);
+  state.guessesMade = 0;
+  state.solved = false;
+  state.guessedNames = new Set();
+  state.ui.board.innerHTML = '';
+  buildHeaderRow(state.ui.headerRow);
+  state.ui.board.insertBefore(state.ui.headerRow, state.ui.board.firstChild);
+  state.ui.winBanner.style.display = 'none';
+  state.ui.guessCount.textContent = '';
+  state.ui.playAgain.style.display = 'none';
+  state.ui.input.focus();
+}
+
+// --- Set up both modes ----------------------------------------------------
+const dailyUI = buildSection('daily');
+document.getElementById('daily-section').appendChild(dailyUI.section);
+const dailyState = { mode: 'daily', ui: dailyUI, answer: pickDailyAnswer(), guessesMade: 0, solved: false, guessedNames: new Set() };
+wireSection(dailyState);
+
+// Replay any progress saved earlier today
+const saved = loadDailyProgress();
+if (saved) {
+  saved.guesses.forEach(name => {
+    const g = CONFIG.roster.find(r => r.name === name);
+    if (g) { dailyState.guessedNames.add(name); dailyState.guessesMade++; renderRow(dailyState, g); }
+  });
+  dailyState.ui.guessCount.textContent = dailyState.guessesMade ? `Guesses: ${dailyState.guessesMade}` : '';
+  if (saved.solved) {
+    dailyState.solved = true;
+    dailyState.ui.winBanner.style.display = 'block';
+    dailyState.ui.winBanner.textContent = `Correct — it was ${dailyState.answer.name}! Solved in ${dailyState.guessesMade} guess${dailyState.guessesMade > 1 ? 'es' : ''}.`;
+    startCountdown(dailyState);
+    dailyState.ui.guessCount.textContent = '';
+  }
+}
+
+const endlessUI = buildSection('endless');
+document.getElementById('endless-section').appendChild(endlessUI.section);
+const endlessState = { mode: 'endless', ui: endlessUI, answer: pickRandomAnswer(), guessesMade: 0, solved: false, guessedNames: new Set(), streakCount: 0 };
+wireSection(endlessState);
+
+// --- Tab switching ----------------------------------------------------
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const mode = btn.dataset.mode;
+    document.getElementById('daily-section').style.display = mode === 'daily' ? 'flex' : 'none';
+    document.getElementById('endless-section').style.display = mode === 'endless' ? 'flex' : 'none';
+  });
+});
+
+// --- Close any open autocomplete dropdown when clicking elsewhere ------
+document.addEventListener('click', (e) => {
+  document.querySelectorAll('.guess-form').forEach(form => {
+    if (!form.contains(e.target)) {
+      const ac = form.querySelector('.autocomplete');
+      if (ac) ac.style.display = 'none';
+    }
+  });
+});
 </script>
 </body>
 </html>
